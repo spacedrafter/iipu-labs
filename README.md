@@ -1,3 +1,3 @@
 ## iipu-labs
 
-Repository for Interfaces and PD of BSUIR.
+Repository for labs of Interfaces and PD of BSUIR.
