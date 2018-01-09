@@ -29,7 +29,7 @@ Shoes.app title: 'Eject', width: 550, height: 200 do
             j = 0
             @array = Array.new(SH)
             Thread.current['array'] = @array
-            @array[j] = {:name => '', :man => '', :guid => '', :device_part => '', :provider => '', :driver_name => '', :bus => '', :driver_file => ''}
+            @array[j] = {:name => '', :man => '', :guid => '', :device_path => '', :provider => '', :driver_name => '', :bus => '', :driver_file => ''}
             information = `lshw` #all connected devices list
             information.split("\n").each do |item|
               if item.include?'description'
@@ -53,7 +53,7 @@ Shoes.app title: 'Eject', width: 550, height: 200 do
                 end
                 @string = ''
                 item.split(': ')[1].split('')[4..15].each { |item| @string += item }
-                @array[j][:device_part] = @string.delete('@')
+                @array[j][:device_path] = @string.delete('@')
                 @string = ''
                 item.split(': ')[1].split('')[0..3].each { |item| @string += item }
                 @array[j][:bus] = @string.delete('@')
@@ -63,7 +63,7 @@ Shoes.app title: 'Eject', width: 550, height: 200 do
                   if line.include?'driver='
                     @array[j][:driver_name] = line.split('=')[1]
                     j += 1
-                    @array[j] = {:name => '', :man => '', :guid => '', :device_part => '', :provider => '', :driver_name => '', :bus => '', :driver_file => ''}
+                    @array[j] = {:name => '', :man => '', :guid => '', :device_path => '', :provider => '', :driver_name => '', :bus => '', :driver_file => ''}
                     break
                   end
                 end
@@ -74,7 +74,7 @@ Shoes.app title: 'Eject', width: 550, height: 200 do
                 device[:driver_file] = 'ERROR'
                 break
               end
-              Dir.chdir("/sys/bus//#{device[:bus]}//devices/#{device[:device_part]}")
+              Dir.chdir("/sys/bus//#{device[:bus]}//devices/#{device[:device_path]}")
               info = IO.read('modalias')
               Dir.chdir("/sbin")
               info = `modinfo #{info}`
@@ -96,7 +96,7 @@ Shoes.app title: 'Eject', width: 550, height: 200 do
               @edit_box.text += "Name: #{item[:name]}\n"
               @edit_box.text += "Manufacturer: #{item[:man]}\n"
               @edit_box.text += "Provider: ASUSTeK Computer Inc.\n"
-              @edit_box.text += "Device Path: #{item[:device_part]}\n"
+              @edit_box.text += "Device Path: #{item[:device_path]}\n"
               @edit_box.text += "Driver Name: #{item[:driver_name]}\n"
               @edit_box.text += "Sys file: #{item[:driver_file]}\n"
               @edit_box.text += "GUID: #{item[:guid]}\n"
@@ -111,9 +111,9 @@ Shoes.app title: 'Eject', width: 550, height: 200 do
     name_device = @disc_line.text
     @i['tread']['array'].each do |item|
       if item[:name] == name_device
-        @time = item[:device_part]
+        @time = item[:device_path]
         Dir.chdir("/sys/bus/#{item[:bus]}/drivers/#{item[:driver_name]}")
-        `echo #{item[:device_part]} | sudo tee -a unbind`
+        `echo #{item[:device_path]} | sudo tee -a unbind`
         break
       end
     end
@@ -122,9 +122,9 @@ Shoes.app title: 'Eject', width: 550, height: 200 do
     name_device = @con_line.text
     @i['tread']['array'].each do |item|
       if item[:name] == name_device
-        @time = item[:device_part]
+        @time = item[:device_path]
         Dir.chdir("/sys/bus/#{item[:bus]}/drivers/#{item[:driver_name]}")
-        `echo #{item[:device_part]} | sudo tee -a bind`
+        `echo #{item[:device_path]} | sudo tee -a bind`
         break
       end
     end
